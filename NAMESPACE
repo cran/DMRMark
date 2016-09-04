@@ -1,0 +1,18 @@
+import(MCMCpack)
+import(mvtnorm)
+import(ellipse)
+
+importFrom("graphics", "lines", "plot", "points")
+importFrom("stats", "dnorm", "model.matrix", "quantile", "rmultinom",
+           "rnorm", "runif", "var")
+
+export(
+       boundFinder,
+       DMRMark,
+       DMRViterbi,
+       FullSample,
+       MakeGSoptions,
+       mvScatter, 
+       reformData
+)
+

@@ -1,0 +1,38 @@
+MakeGSoptions <- function(pi0 = c(100,100,5,5),
+                          cmu0 = c(11.5, 11.5, 8, 8),
+                          theta0 = c(-3,2),
+                          mu0 = matrix(c(-2,2,2,-2),2, byrow = TRUE),
+                          kappa0 = c(50,50,5,5),
+                          nu0 = rep(4,2),
+                          A0 = array(rep(c(2,0.8,0.8,4),2),dim = c(2,2,2)),
+                          alpha12N = rep(40,3),
+                          beta12N = rep(60,3),
+                          D_mu = rep(-2,2),
+                          chi_alpha = 0.2,
+                          burnin = 500,
+                          nsamples = 100,
+                          sampleSep = 10,
+                          onHMM = TRUE,
+                          track = FALSE,
+                          verbose = FALSE) {
+  
+  opts <- list(pi0 = pi0,
+               cmu0 = cmu0,
+               theta0 = theta0,
+               mu0 = mu0,
+               kappa0 = kappa0,
+               nu0 = nu0,
+               A0 = A0,
+               alpha12N = alpha12N,
+               beta12N = beta12N,
+               D_mu = D_mu,
+               chi_alpha = chi_alpha,
+               burnin = burnin,
+               nsamples = nsamples,
+               sampleSep = sampleSep,
+               onHMM = onHMM,
+               track = track,
+               verbose = verbose)
+  
+  return(opts)
+}
