@@ -1,4 +1,4 @@
-dm_dmvnorm <- function(x,mean,sigma,log=FALSE,pd,logdet,invSigma) {
+dm_dmvnorm <- function(x,mean,sigma,log=FALSE,pd) {
   if (missing(mean)) {
     mean <- matrix(0, ncol = ncol(x))
   }
@@ -8,20 +8,6 @@ dm_dmvnorm <- function(x,mean,sigma,log=FALSE,pd,logdet,invSigma) {
     } else {
       t_m = 1
     }
-  }
-  if(missing(invSigma)) {
-    if (missing(sigma)) {
-      sigma <- diag(2)
-    }
-    invSigma <- tryCatch(chol2inv(chol(sigma)), 
-                         error = function(e) {
-                           print("sigma error") 
-                           return(diag(2)/1000)
-                         }
-    )
-  }
-  if(missing(logdet)) {
-    logdet <- log(det(sigma))
   }
   if(!missing(pd)) {
     y = reformData(x, pd)
@@ -37,9 +23,9 @@ dm_dmvnorm <- function(x,mean,sigma,log=FALSE,pd,logdet,invSigma) {
     k <- ncol(y) - sum(is.na(colSums(y)))
   } else {
     k <- length(y) - sum(is.na(y))
-    if (!is.na(y2[1])) {
-      if (!is.na(y2[2])) {
-        dens <- dmvnorm(y2, mean, sigma, TRUE)
+    if (!is.na(y[1])) {
+      if (!is.na(y[2])) {
+        dens <- dmvnorm(y, mean, sigma, TRUE)
       } else {
         dens <- dens + dnorm(y[1], mean[1], sqrt(sigma[1,1]), TRUE)
       }
@@ -52,7 +38,6 @@ dm_dmvnorm <- function(x,mean,sigma,log=FALSE,pd,logdet,invSigma) {
       return(exp(dens))
     }
   }
-
   
   if (!missing(pd)) {
     #get density mode
@@ -77,9 +62,15 @@ dm_dmvnorm <- function(x,mean,sigma,log=FALSE,pd,logdet,invSigma) {
     i2 <- which(!is.na(y[,1]) & is.na(y[,2]))
     i3 <- which(is.na(y[,1]) & !is.na(y[,2]))
     
-    dens[i1] <- dmvnorm(y[i1,], mean, sigma, TRUE)
-    dens[i2] <- dnorm(y[i2,1], mean[1], sqrt(sigma[1,1]), TRUE)
-    dens[i3] <- dnorm(y[i3,2], mean[2], sqrt(sigma[2,2]), TRUE)
+    if (length(i1) != 0) {
+      dens[i1] <- dmvnorm(y[i1,], mean, sigma, TRUE)
+    }
+    if (length(i2) != 0) {
+      dens[i2] <- dnorm(y[i2,1], mean[1], sqrt(sigma[1,1]), TRUE)
+    }
+    if (length(i3) != 0) {
+      dens[i3] <- dnorm(y[i3,2], mean[2], sqrt(sigma[2,2]), TRUE)
+    }
   }
   
   if (log) {
@@ -94,19 +85,26 @@ dnormP <- function(data, mu, Sigma, log = FALSE, pd) {
   y = reformData(data, pd)
   t_m = nrow(data)
   dens = rep(0, t_m)
+  a1 <- any(is.na(y[,1]))
+  a2 <- any(is.na(y[,2]))
+  piv <- 1
+  if (a1 & (!a2)) {
+    piv <- 2 #for excess tumor samples
+  } 
+  
   for (nn in 1 : n) {
     X <- y[(nn*t_m-t_m+1):(nn*t_m),]
     
     #Only need to check the first row
-    if (!is.na(X[1,1])) {
-      if (!is.na(X[1,2])) {
-        dens <- dens + dnorm(X[,1], mu, sqrt(Sigma[1,1]), TRUE)
-        dens <- dens + dnorm(X[,2]-X[,1], 0, sqrt(Sigma[2,2]), TRUE)
+    if (!is.na(X[1,piv])) {
+      if (!is.na(X[1,3-piv])) {
+        dens <- dens + dnorm(X[,piv], mu, sqrt(Sigma[1,1]), TRUE)
+        dens <- dens + dnorm(X[,3-piv]-X[,piv], 0, sqrt(Sigma[2,2]), TRUE)
       } else {
-        dens <- dens + dnorm(X[,1], mu, sqrt(Sigma[1,1]), TRUE)
+        dens <- dens + dnorm(X[,piv], mu, sqrt(Sigma[1,1]), TRUE)
       }
     } else {
-      dens <- dens + dnorm(X[,2], mu, sqrt(Sigma[1,1]+Sigma[2,2]), TRUE)
+      dens <- dens + dnorm(X[,3-piv], mu, sqrt(Sigma[1,1]+Sigma[2,2]), TRUE)
     }
   }
   

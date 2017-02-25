@@ -44,9 +44,9 @@ DMRViterbi(mv, pars, L = rep(1, nrow(mv)), starting = NULL,
   Default is 'max'.
 }
   \item{VitP}{Only enabled when 'region = FALSE'.
-  The minimum posterior probabilities required to be the DML states.
-  A locus with DML's posterior probability lower than 'VitP' will in the 
-  nDML states with highest probabilities. When set to NULL, simply return 
+  The minimum posterior probabilities required to be the DMC states.
+  A locus with DMC's posterior probability lower than 'VitP' will in the 
+  non-DMC states with highest probabilities. When set to NULL, simply return 
   the MAP states. Default is NULL.
 }
 }

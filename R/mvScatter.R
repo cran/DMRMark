@@ -1,4 +1,4 @@
-mvScatter <- function(mv, isDML, pd=NULL, nPlot=5000) {
+mvScatter <- function(mv, isDMC, pd=NULL, nPlot=5000) {
   plot(-6.5:6.5,-6.5:6.5, type = "n",
        xlim = c(-6.5, 6.5), xlab = colnames(mv)[1],
        ylim = c(-6.5, 6.5), ylab = colnames(mv)[2])
@@ -7,13 +7,13 @@ mvScatter <- function(mv, isDML, pd=NULL, nPlot=5000) {
   lwd <- c(1,1)
   
   t_m2 <- nrow(mv)
+  trueSig <- isDMC
   if (t_m2 > nPlot) {
     temp <- sample(1:t_m2, nPlot)
-    trueSig <- isDML[temp]
+    trueSig <- isDMC[temp]
     mv <- mv[temp,]
     t_m2 <- nPlot
   }
-  
   if (is.null(pd)) {
     n <- ncol(mv)/2
     if (n > 1) {
@@ -28,8 +28,8 @@ mvScatter <- function(mv, isDML, pd=NULL, nPlot=5000) {
   }
   
   prb <- list()
-  prb[[1]] <- which(isDML == 0)
-  prb[[2]] <- which(isDML == 1)
+  prb[[1]] <- which(trueSig == 0)
+  prb[[2]] <- which(trueSig == 1)
   
   mv2 <- reformData(mv, pd)
   

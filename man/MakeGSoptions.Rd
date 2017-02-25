@@ -41,10 +41,10 @@ MakeGSoptions(pi0 = c(100, 100, 5, 5),
 }
   \item{theta0}{Length-2 vector, each value is the mean of a Normal distributions.
   Priors for means of control groups of two non-differentially 
-  methylated loci (nDML) responses.
+  methylated CpG sites (non-DMCs) responses.
 }
   \item{mu0}{2-by-2 matrix, each row is the means of a bivariate Normal distributions.
-  Priors for means of two DMLs responses
+  Priors for means of two DMCs responses
 }
   \item{kappa0}{Length-4 vector, each value is the prior observation number of 
   Normal-Inverse-Gamma (NIG) or Normal-Inverse-Wishart (NIW) depends on the corresponding
@@ -52,25 +52,25 @@ MakeGSoptions(pi0 = c(100, 100, 5, 5),
 }
   \item{nu0}{Length-2 vector, each value is the degree 
   of freedom of an IW distribution.
-  Priors for covariance of DML responses.
+  Priors for covariance of DMC responses.
 }
   \item{A0}{2-by-2-by-2 array, each 2-by-2 matrix along the 
   third dimension is the scale matrix of an IW distribution.
-  Priors for covariance of DML responses.
+  Priors for covariance of DMC responses.
 }
   \item{alpha12N}{Length-3 vector, each value is the shape of an IG distribution.
-  Priors for variance of nDML responses.
+  Priors for variance of non-DMC responses.
 }
   \item{beta12N}{Length-3 vector, each value is the rate of an IG distribution.
-  Priors for variance of nDML responses.
+  Priors for variance of non-DMC responses.
 }
   \item{D_mu}{Length-2 vector, each value is the minimum 
-  distance between two group means of DMLs.
-  Prior for truncating the means of bivariate normals of DML's responses.
+  distance between two group means of DMCs.
+  Prior for truncating the means of bivariate normals of DMC's responses.
 }
   \item{chi_alpha}{p-value of chi-square distribution with 2 degrees of freedom.
   Prior for truncating the covariant matrices 
-  of bivariate normals of DML's responses.
+  of bivariate normals of DMC's responses.
 }
 
   \item{burnin}{Number of iterations for burn-in.

@@ -50,10 +50,10 @@ experimental designs in the future.
 	par <- DMRMark(mv, L, starting)
 	
 	# Get the posterior of being certain states
-	# Return the result of DML for plotting by setting 'region=FALSE'
+	# Return the result of DMC for plotting by setting 'region=FALSE'
 	results <- DMRViterbi(mv, par, L, starting, region=FALSE)
 	
-	# The MAP states being 3 or 4 indicate DMLs
-	isDML <- (results$states > 2) + 0
-	mvScatter(mv, isDML, nPlot=10000)
+	# The MAP states being 3 or 4 indicate DMCs
+	isDMC <- (results$states > 2) + 0
+	mvScatter(mv, isDMC, nPlot=10000)
 }

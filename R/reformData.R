@@ -1,6 +1,6 @@
 reformData <- function (mv, pd=NULL) {
   if (any(is.na(mv))) {
-    stop("Reform data error: NA not handled.")
+    #stop("Reform data error: NA not handled.")
   }
   
   if (is.null(pd)) {
@@ -17,28 +17,31 @@ reformData <- function (mv, pd=NULL) {
   }
   
   n <- ncol(pd) - 1
-  t <- ncol(mv)
-  if (is.null(t)) {
-    t <- length(mv)
-  }
-  
-  mv2 <- NULL
+  t_m = nrow(mv)
+  mv2 <- matrix(nrow = 0, ncol = 2)
   for (i in 1 : n) {
-    b <- matrix(0, t, 2)
     temp = which(pd[,i] == 1)
     if (length(temp) == 1) {
       if (pd[temp,n+1] == 0) {
-        b[temp, 1] <- 1
-        b[temp, 2] <- NA
+        # Normal
+        mv2 <- rbind(mv2, cbind(mv[,temp],rep(NA,t_m)))
+        
       } else {
-        b[temp, 2] <- 1
-        b[temp, 1] <- NA
+        # Tumor
+        mv2 <- rbind(mv2, cbind(rep(NA,t_m),mv[,temp]))
+        
       }
     } else {
-      b[temp[1], pd[temp[1],n+1]+1] <- 1
-      b[temp[2], pd[temp[2],n+1]+1] <- 1
+      if (pd[temp[1],n+1] == 0) {
+        # Normal first
+        mv2 <- rbind(mv2, cbind(mv[,temp[1]],mv[,temp[2]]))
+        
+      } else {
+        # Tumor first
+        mv2 <- rbind(mv2, cbind(mv[,temp[2]],mv[,temp[1]]))
+        
+      }
     }
-    mv2 <- rbind(mv2, mv %*% b)
   }
   mv2
 }

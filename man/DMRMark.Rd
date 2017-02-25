@@ -57,18 +57,18 @@ DMRMark(mv, L = rep(1, nrow(mv)), starting = NULL,
 \value{
 	The return value depends on 'GSoptions$track'. In default situation
 	('GSoptions$track = FALSE'), the return value is a list contains:
-	\item{theta}{A vector contains posterior means of nDML's control groups.
+	\item{theta}{A vector contains posterior means of non-DMC's control groups.
 }
 	\item{mu}{A 2-by-2 matrix, each row 
-	corresponding to the paired posterior mean of DMLs.
+	corresponding to the paired posterior mean of DMCs.
 }
 	\item{sigma12}{A vector contains posterior means 
-	of variance of nDML's control groups.
+	of variance of non-DMC's control groups.
 }
-	\item{sigmaN}{Single value, the posterior mean of variance of nDML's 
+	\item{sigmaN}{Single value, the posterior mean of variance of non-DMC's 
 	between-group difference.
 }
-	\item{Sigma34}{An Array contains posterior means of DML's Covariance.
+	\item{Sigma34}{An Array contains posterior means of DMC's Covariance.
 }
 	\item{charL}{Posterior means of characteristic length.
 }

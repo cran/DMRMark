@@ -20,8 +20,17 @@ FullSample <- function(data, L, starting,
   if(any(is.na(data))) {
     stop("NA not handled in input data.")
   }
-  X <- reformData(data, pd)
-  noPair <- any(is.na(X[,1]))
+  
+  temp <- reformData(data, pd)
+  a1 <- any(is.na(temp[,1]))
+  a2 <- any(is.na(temp[,2]))
+  if (a1 & a2) {
+    cat("Unpaired samples detected in both groups, estimation can be slow.\n")
+    noPair <- TRUE
+  } else {
+    noPair <- FALSE
+  }
+  rm(temp)
   
   if(!is.null(sampling)) {
     # mask following two parameters
@@ -52,13 +61,18 @@ FullSample <- function(data, L, starting,
     for (kk in 1 : k) {
       mu[kk,] <- rnorm(2,mu0[kk,],1/K0[kk])
     }
-    for (kk in c(1,2)) {
-      sigma[1,1,kk] <- rinvgamma(1, v0[kk], A0[1,1,kk]) 
-    }
-    sigma[2,2,1:2] <- rinvgamma(1, A0[2,2,2], A0[2,2,1]) 
     
-    for (kk in c(3,4)) {
-      sigma[,,kk] <- riwish(v0[kk], A0[,,kk])
+    for (kk in 1:k) {
+      if (kk == 3 | kk == 4) {
+        sigma[,,kk] <- riwish(v0[kk], A0[,,kk])
+      } else {
+        sigma[1,1,kk] <- rinvgamma(1, v0[kk], A0[1,1,kk]) 
+        if (kk == 1) {
+          sigma[2,2,kk] <- rinvgamma(1, A0[2,2,2], A0[2,2,1]) 
+        } else {
+          sigma[2,2,kk] <- sigma[2,2,1]
+        }
+      }
     }
   } else {
     mu <- mu0
@@ -261,15 +275,13 @@ NIWSampler <- function(data, states, mu0, K0, v0, A0, pd, gap, mu_old = NULL, si
   k <- nrow(mu0)
   mu_all <- matrix(0, k, 2)
   sigma_all <- array(rep(c(1,0,0,1),k), dim = c(2,2,k))
-  for (kk in 1 : k) {
-    
+  for (kk in c(1,2)) {
     # For empty cluster
     if(sum(states == kk) <= 1) {
       sigma_all[,,kk] <- riwish(v0[kk], A0[,,kk])
       mu_all[kk,] <- mu_old[kk,]# rnorm(1, mu0[kk,], sigma_all[,,kk]/K0[kk])
       # cat("strange: ", kk, "\n")
       next
-      
     }  
     
     # First compute the sigma of (C-N)
@@ -287,43 +299,61 @@ NIWSampler <- function(data, states, mu0, K0, v0, A0, pd, gap, mu_old = NULL, si
       sigma_all[2,2,kk] <- sigma_all[2,2,1]
     }
     
-    # Compute the sigma & mu of N
+    # Compute the sigma & mu of N or C
     # only for 1,2,5
-    if (kk %in% c(1,2,5)) {
-      X <- data[states == kk,]
-      X <- reformData(X, pd)
+    X <- data[states == kk,]
+    X <- reformData(X, pd)
+    
+    a1 <- any(is.na(X[,1]))
+    a2 <- any(is.na(X[,2]))
+    if (!a1) {
       X <- X[,1]
-      mu <- mean(X)
-      if (kk == 5) {
-        mu <- 0
-        mu_all[kk,1] <- 0
-        S <- sum(X^2)/2
-        sigma_all[1,1,kk] <- rinvgamma(1, v0[kk]+n/2, A0[1,1,kk]+S)
-      } else {
-        n <- length(X)
-        Kn <- K0[kk] + n
-        S <- (n*K0[kk])/Kn*sum((mu - mu0[kk,1])^2)/2 + sum((X - mu)^2)/2
-        sigma_all[1,1,kk] <- rinvgamma(1, v0[kk]+n/2, A0[1,1,kk]+S)
-        mu_n <- (K0[kk]*mu0[kk,1] + n*mu) / Kn
-        mu_all[kk,1] <- rnorm(1, mu_n, sqrt(sigma_all[1,1,kk]/Kn))
-      }
-      next #IMPORTANT!!!!!!! 
+    } else if (!a2){
+      X <- X[,2]
+    } else {
+      stop("Unexpected NA produced, please check pd.")
+    }
+    
+    mu <- mean(X)
+    if (kk == 5) {
+      mu <- 0
+      mu_all[kk,1] <- 0
+      S <- sum(X^2)/2
+      sigma_all[1,1,kk] <- rinvgamma(1, v0[kk]+n/2, A0[1,1,kk]+S)
+    } else {
+      n <- length(X)
+      Kn <- K0[kk] + n
+      S <- (n*K0[kk])/Kn*sum((mu - mu0[kk,1])^2)/2 + sum((X - mu)^2)/2
+      sigma_all[1,1,kk] <- rinvgamma(1, v0[kk]+n/2, A0[1,1,kk]+S)
+      mu_n <- (K0[kk]*mu0[kk,1] + n*mu) / Kn
+      mu_all[kk,1] <- rnorm(1, mu_n, sqrt(sigma_all[1,1,kk]/Kn))
+    }
+  } 
+    
+  for (kk in c(3,4)) {
+    # For empty cluster
+    if(sum(states == kk) <= 1) {
+      sigma_all[,,kk] <- riwish(v0[kk], A0[,,kk])
+      mu_all[kk,] <- mu_old[kk,]# rnorm(1, mu0[kk,], sigma_all[,,kk]/K0[kk])
+      # cat("strange: ", kk, "\n")
+      next
     } 
     
     # compute the SIGMA of DML
     # only for 3,4
     X <- data[states == kk,]
     X <- reformData(X, pd)
-    mu <- colMeans(X)
-    n <- nrow(X)
-    S <- var(X) * (n-1)
-    Kn <- K0[kk] + n
-    vn <- v0[kk] + n
-    mu_n <- (K0[kk] * mu0[kk,] + n * mu) / Kn
     
-    # compute the mu of DML
     if (is.null(mu_old)) {
+      i1 <- which(!is.na(X[,1]) & !is.na(X[,2]))
+      n <- length(i1)
+      mu <- colMeans(X, na.rm = TRUE)
+      S <- var(X[i1,]) * (n-1)
+      Kn <- K0[kk] + n
+      vn <- v0[kk] + n
+      mu_n <- (K0[kk] * mu0[kk,] + n * mu) / Kn
       mu_all[kk,] <- rmvnorm(1, mu_n, sigma_old[,,kk]/Kn)
+      
     } else {
       # Truncated Normal Prior
       # Use MH sampling      
@@ -331,13 +361,13 @@ NIWSampler <- function(data, states, mu0, K0, v0, A0, pd, gap, mu_old = NULL, si
       acc <- -1
       mu_all[kk,] <- rmvnorm(1, mu_old[kk,], diag(2)*0.1)
 
-      oldLL <- sum(dmvnorm(X, mu_old[kk,], sigma_old[,,kk], TRUE)) + 
+      oldLL <- sum(dm_dmvnorm(X, mu_old[kk,], sigma_old[,,kk], TRUE)) + 
         dmvnorm(mu_old[kk,], mu0[kk,], diag(2)/K0[kk], TRUE)
       
       if (kk == 4) {
         #Hypo DMR
-        if ((mu_all[kk,1] - mu_all[kk,2]) >= gap[1]) {
-          newLL <- sum(dmvnorm(X, mu_all[kk,], sigma_old[,,kk], TRUE)) +
+        if ((mu_all[kk,1] - mu_all[kk,2]) > gap[1]) {
+          newLL <- sum(dm_dmvnorm(X, mu_all[kk,], sigma_old[,,kk], TRUE)) +
             dmvnorm(mu_all[kk,], mu0[kk,], diag(2)/K0[kk], TRUE)
           acc <- exp(newLL - oldLL)
         } else {
@@ -350,7 +380,7 @@ NIWSampler <- function(data, states, mu0, K0, v0, A0, pd, gap, mu_old = NULL, si
       } else if (kk == 3){
         #Hyper DMR
         if ((mu_all[kk,1] - mu_all[kk,2]) < -gap[2]) {
-          newLL <- sum(dmvnorm(X, mu_all[kk,], sigma_old[,,kk], TRUE)) +
+          newLL <- sum(dm_dmvnorm(X, mu_all[kk,], sigma_old[,,kk], TRUE)) +
             dmvnorm(mu_all[kk,], mu0[kk,], diag(2)/K0[kk], TRUE)
           acc <- exp(newLL - oldLL)
         } else {
@@ -418,15 +448,13 @@ HMMSampler <- function(logDens, trDens, initDens, starting = 1) {
   ending <- c(starting[-1]-1,t_m)
   
   const <- apply(logDens,1,max)
-  logDens <-  logDens - const
+  logDens <- logDens - const
   dens <- exp(logDens)
   
   states <- rep(0, t_m)
   beta <- matrix(nrow=t_m,ncol=k)
   beta[ending,] <- dens[ending,]
   beta[ending,] <- beta[ending,] / rep(rowSums(beta[ending,]),k)
-  
-  trDens <- trDens
   
   for (case in 1 : lt) {
     if (ending[case] == starting[case]) {
@@ -552,7 +580,7 @@ NIWSamplerP <- function(data, states, mu0, K0, v0, A0, pd, gap, mu_old=NULL, sig
       
       if (kk == 4) {
         #Hypo DMR
-        if ((mu_all[kk,1] - mu_all[kk,2]) >= gap[1]) {
+        if ((mu_all[kk,1] - mu_all[kk,2]) > gap[1]) {
           newLL <- sum(dm_dmvnorm(X, mu_all[kk,], sigma_old[,,kk], TRUE)) +
             dmvnorm(mu_all[kk,], mu0[kk,], diag(2)/K0[kk], TRUE)
           acc <- exp(newLL - oldLL)
