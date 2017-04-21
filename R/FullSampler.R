@@ -236,8 +236,8 @@ charLSampler <- function(states, L, starting, cmu0, charL0) {
 #       print(dnorm(logCL, cmu0[i], 10/length(Lt), TRUE))
 #       print(transLL(At, Lt, charL0[i]))
 #       print(dnorm(log(charL0[i]), cmu0[i], 100/length(Lt), FALSE))
-      LogLik <- transLL(At, Lt, charL) + dnorm(logCL, cmu0[i], 1, TRUE)
-      LLold <- transLL(At, Lt, charL0[i]) + dnorm(log(charL0[i]), cmu0[i], 1, TRUE)
+      LogLik <- transLL(At, Lt, charL) + dnorm(logCL, cmu0[i], 10, TRUE)
+      LLold <- transLL(At, Lt, charL0[i]) + dnorm(log(charL0[i]), cmu0[i], 10, TRUE)
       acc <- exp(LogLik - LLold)
     } else {
       LLold <- -987654321

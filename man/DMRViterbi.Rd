@@ -12,7 +12,7 @@
 \usage{
 DMRViterbi(mv, pars, L = rep(1, nrow(mv)), starting = NULL, 
 			pd = NULL, region = TRUE, 
-			orderBy = c("max", "mean", "min"), VitP = NULL)
+			orderBy = c("max", "mean", "median", "min"), VitP = NULL)
 }
 
 \arguments{
@@ -38,9 +38,8 @@ DMRViterbi(mv, pars, L = rep(1, nrow(mv)), starting = NULL,
   and states for individual loci. Default is TRUE.
 }
   \item{orderBy}{Only enabled when 'region = TRUE'.
-  Order the regions by which statistics? Choice include 'max'
-  , 'mean' and 'min', which orders the regions by the maximum, geometric mean 
-  or minimum of the posterior probabilities in each region respectively.
+  Order the regions by which statistics? Choice include 'max', 'mean', 'median' and 'min', which orders the regions by the maximum, geometric mean, 
+  median or minimum of the posterior probabilities in each region respectively.
   Default is 'max'.
 }
   \item{VitP}{Only enabled when 'region = FALSE'.
@@ -73,6 +72,9 @@ DMRViterbi(mv, pars, L = rep(1, nrow(mv)), starting = NULL,
 	of the MAP state in each region 
 }
 	\item{maxVP}{The maximum Viterbi posterior probability
+	of the MAP state in each region 
+}
+	\item{midVP}{The median Viterbi posterior probability
 	of the MAP state in each region 
 }
 }

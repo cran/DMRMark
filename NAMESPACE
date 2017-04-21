@@ -2,6 +2,7 @@ import(MCMCpack)
 import(mvtnorm)
 import(ellipse)
 
+importFrom("stats", "median")
 importFrom("graphics", "lines", "plot", "points")
 importFrom("stats", "dnorm", "model.matrix", "quantile", "rmultinom",
            "rnorm", "runif", "var")

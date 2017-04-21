@@ -1,5 +1,5 @@
 DMRViterbi <- function(mv, pars, L=rep(1,nrow(mv)), starting=NULL, pd=NULL, 
-                       region=TRUE, orderBy=c("max", "mean", "min"), VitP=NULL) {
+                       region=TRUE, orderBy=c("max", "mean", "median", "min"), VitP=NULL) {
   
   if (is.null(starting)) {
     temp <- which((L > 100000) | L < 0)
@@ -57,7 +57,8 @@ DMRViterbi <- function(mv, pars, L=rep(1,nrow(mv)), starting=NULL, pd=NULL,
                         MAP_state=rep(0,regNum),
                         minVP=rep(-1,regNum),
                         meanVP=rep(-1,regNum),
-                        maxVP=rep(-1,regNum))
+                        maxVP=rep(-1,regNum),
+                        midVP=rep(-1,regNum))
 
   for (i in 1 : regNum) {
     b <- results$begin[i]
@@ -65,18 +66,21 @@ DMRViterbi <- function(mv, pars, L=rep(1,nrow(mv)), starting=NULL, pd=NULL,
     st <- states[regBound[i]]
     
     results$MAP_state[i] <- st
-    results$minVP[i] <- min(fm2$delta[b:e,st])
-    results$meanVP[i] <- exp(mean(log(fm2$delta[b:e,st]), na.rm = TRUE))
-    results$maxVP[i] <- max(fm2$delta[b:e,st])
+    results$minVP[i] <- min(fm2$delta[b:e,st], na.rm = T)
+    results$meanVP[i] <- exp(mean(log(fm2$delta[b:e,st]), na.rm = T))
+    results$maxVP[i] <- max(fm2$delta[b:e,st], na.rm = T)
+    results$midVP[i] <- median((fm2$delta[b:e,st]), na.rm = T)
   }
 
   #order by VP decreasingly, from DM to non-DM
   VP <- results$maxVP
   temp <- match.arg(orderBy)
   if (temp == "mean") {
-  VP <- results$meanVP
+    VP <- results$meanVP
   } else if (temp == "min") {
     VP <- results$minVP
+  } else if (temp == "median") {
+    VP <- results$midVP
   }
 
   results <- results[order(VP,  decreasing = TRUE),]

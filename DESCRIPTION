@@ -2,7 +2,7 @@ Package: DMRMark
 Type: Package
 Title: DMR Detection by Non-Homogeneous Hidden Markov Model from
         Methylation Array Data
-Version: 1.1.0
+Version: 1.1.1
 Date: 2017-02-25
 Author: Linghao SHEN <sl013@ie.cuhk.edu.hk>
 Depends: MCMCpack, mvtnorm, ellipse
@@ -14,7 +14,7 @@ Description: Perform differential analysis for
         for estimating spatial correlation and a novel Constrained 
         Gaussian Mixture Model for modeling the M-value pairs of each individual locus.
 License: GPL
-Packaged: 2017-02-25 13:59:13 UTC; Office
+Packaged: 2017-04-21 13:05:12 UTC; Office
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2017-02-25 15:57:45
+Date/Publication: 2017-04-21 17:58:43 UTC
